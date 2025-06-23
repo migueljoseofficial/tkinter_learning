@@ -7,3 +7,17 @@ port = 443
 API_KEY = "TEST"
 WS_URL = "wss://wss-sim.t4login.com/v1" # connection to simulator
 
+
+#the actual websocket connection
+async def connect():
+     
+     pass
+
+
+#heartbeat for every 20 seconds
+async def heartbeat():
+     pass
+
+#authentication using login
+async def authenticate():
+
