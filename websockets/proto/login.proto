@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-message LoginRequest {
-  string firm = 1;
-  string username = 2;
-  string password = 3;
-  string app_name = 4;
-  string app_license = 5;
-}
