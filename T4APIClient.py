@@ -52,10 +52,14 @@ class T4APIClient:
         )
 
         #envelope and encrypt request
-        self.send_message(login_info)
+        await self.send_message(login_info)
 
         #check response
         login_response = await self.ws.recv()
+        message = decode_message(login_response)
+        if message.HasField("login_response"):
+            login_response = message.login_response
+            print(login_response)
 
         return self.handleLogin(login_response)
 
@@ -63,13 +67,9 @@ class T4APIClient:
         message = decode_message(message) #decodes message
 
         #what it means if it's sucessful
-        imp_var = message['something']
         
-        #if false return False and end
-        if imp_var == "test":
-            return False
-
-        #getter functions responsiblities
+        
+        #get market and account data
 
 
         return True

@@ -3,10 +3,11 @@ import websockets
 import yaml
 #gets the proto file for logging in
 import sys, os
-
+from google.protobuf.timestamp_pb2 import Timestamp
 sys.path.insert(0, os.path.abspath("proto"))
-
+import time
 from proto.t4.v1.auth import auth_pb2
+from proto.t4.v1 import service_pb2
 from tools.ClientMessageHelper import ClientMessageHelper
 from tools.ProtoUtils import encode_message, decode_message
 import threading
@@ -17,7 +18,7 @@ port = 443
 heartbeat = 20
 API_KEY = "TEST"
 WS_URL = "wss://wss-sim.t4login.com/v1" # connection to simulator
-
+running = False
 #getting info from the config file
 def load_config(path="config/config.yaml"):
      with open(path, "r") as file:
@@ -43,13 +44,14 @@ async def connect_with_auth(ws, config): #arguments are the websocket and the co
      print("Sending LoginRequest...")
      await ws.send(client_msg)
      print(client_msg)
-
+     global running
+     running = True
      #making a client mesasge helper.
 
 
-     response = await ws.recv()
-     print(decode_message(response))
-     return response
+    # response = await ws.recv()
+     #print(decode_message(response))
+   #  return response
      
 
 #handle the login response
@@ -66,21 +68,53 @@ async def handle_heartbeat(response):
      pass
 
 #heartbeat for every 20 seconds
-def start_heartbeat():
-     i
-async def send_hearbeat():
-      pass
+async def send_message(ws, message):
+     request = ClientMessageHelper.create_client_message(message)
+     encrypted_request = encode_message(request)
+     await ws.send(encrypted_request)
+
+async def send_heartbeat(ws):
+     global running
+     while running:
+          
+          heartbeat_msg = service_pb2.Heartbeat(timestamp=int(time.time() * 1000))
+
+
+          await send_message(ws, {"heartbeat": heartbeat_msg})
+          print("Heartbeat sent.")
+     
+          await asyncio.sleep(heartbeat)
 #authentication using login
 async def authenticate():
      pass
 
+async def listen(ws):
+    global running
+    try:
+        while running:
+            msg = await ws.recv()
+            print("Received:", decode_message(msg))
+    except websockets.exceptions.ConnectionClosed:
+        print("Connection closed by server.")
+        running = False
+    except Exception as e:
+        print("Error while listening:", e)
+        running = False
 
 async def main():
     config = load_config("config/config.yaml")
     url = config["websocket"]["url"]
 
-    async with websockets.connect(url) as websocket:
-        await connect_with_auth(websocket, config)
+    try:
+        async with websockets.connect(url) as websocket:
+            await asyncio.gather(
+                connect_with_auth(websocket, config),
+                send_heartbeat(websocket),
+               listen(websocket)
+            )
+    except Exception as e:
+        print("WebSocket error:", e)
+
 
 
 
