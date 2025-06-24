@@ -3,10 +3,12 @@ import websockets
 import yaml
 #gets the proto file for logging in
 import sys, os
+
 sys.path.insert(0, os.path.abspath("proto"))
 
 from proto.t4.v1.auth import auth_pb2
 from tools.ClientMessageHelper import ClientMessageHelper
+from tools.ProtoUtils import encode_message, decode_message
 #port443
 
 #heartbeat connection every 20 seconds (only have 3 consecutive heratbeats to send before the connection is termianted)
@@ -35,18 +37,27 @@ async def connect_with_auth(ws, config): #arguments are the websocket and the co
 
      #client message helper:
      client_msg = ClientMessageHelper.create_client_message({"login_request": login})
+     client_msg = encode_message(client_msg)
      print("Sending LoginRequest...")
-     await ws.send(client_msg.SerializeToString())
-     print(login.SerializeToString())
+     await ws.send(client_msg)
+     print(client_msg)
 
      #making a client mesasge helper.
 
 
      response = await ws.recv()
-     print("Received:")
-     print(response)
+     print(decode_message(response))
+     return response
+     
+
+     #handle the login response
+     async def handle_login(response):
+          pass
 
 
+     #handle the heartbeat response
+     async def handle_heartbeat(response):
+          pass
 #heartbeat for every 20 seconds
 async def heartbeat():
      pass

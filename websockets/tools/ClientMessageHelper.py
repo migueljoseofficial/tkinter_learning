@@ -1,15 +1,16 @@
 import sys
 import os
 
-# Adjust to point to the parent of `proto/` or `generated/`
+#adjusts system path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'proto')))
-from t4.v1 import service_pb2
+from t4.v1 import service_pb2 #utilizes service.proto
 
 class ClientMessageHelper:
     @staticmethod
-    def create_client_message(message_dict: dict) -> service_pb2.ClientMessage:
+    def create_client_message(message_dict: dict) -> service_pb2.ClientMessage: #returns a protobuf readable by the websocket api (client message)
         client_msg = service_pb2.ClientMessage()
 
+        #puts the corresponding message into the "envelope" client message
         if "login_request" in message_dict:
             client_msg.login_request.CopyFrom(message_dict["login_request"])
         elif "authentication_token_request" in message_dict:
