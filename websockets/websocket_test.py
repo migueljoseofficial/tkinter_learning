@@ -9,10 +9,12 @@ sys.path.insert(0, os.path.abspath("proto"))
 from proto.t4.v1.auth import auth_pb2
 from tools.ClientMessageHelper import ClientMessageHelper
 from tools.ProtoUtils import encode_message, decode_message
+import threading
 #port443
 
 #heartbeat connection every 20 seconds (only have 3 consecutive heratbeats to send before the connection is termianted)
 port = 443
+heartbeat = 20
 API_KEY = "TEST"
 WS_URL = "wss://wss-sim.t4login.com/v1" # connection to simulator
 
@@ -50,17 +52,24 @@ async def connect_with_auth(ws, config): #arguments are the websocket and the co
      return response
      
 
-     #handle the login response
-     async def handle_login(response):
-          pass
+#handle the login response
+async def handle_login(response):
+     response = decode_message(response)
+
+     #grab token
+
+     #grab all the other important information
 
 
-     #handle the heartbeat response
-     async def handle_heartbeat(response):
-          pass
-#heartbeat for every 20 seconds
-async def heartbeat():
+#handle the heartbeat response
+async def handle_heartbeat(response):
      pass
+
+#heartbeat for every 20 seconds
+def start_heartbeat():
+     i
+async def send_hearbeat():
+      pass
 #authentication using login
 async def authenticate():
      pass
@@ -74,8 +83,6 @@ async def main():
         await connect_with_auth(websocket, config)
 
 
-
-        
 
 asyncio.run(main())
 # config = load_config()
