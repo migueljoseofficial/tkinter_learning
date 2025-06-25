@@ -23,7 +23,17 @@ class Client:
         self.running = False
         self.heartbeat_time = 20 
 
-    #connects to api
+        #accounts
+        self.accounts = dict()
+            
+        #connection
+        self.login_response = None
+
+
+        #tokens
+        self.jw_token = None
+        self.jw_expiration = None
+        #connects to api
     async def connect(self):
     
         try:
@@ -72,9 +82,31 @@ class Client:
 
     def handle_login(self, message):
         
+        if message.result == 0:
+            self.login_response = message
+            self.running = True
 
-
-        return True
+        # store token   
+        print(message.authentication_token)
+        if message.authentication_token and message.authentication_token.token:
+            
+            self.jw_token = message.authentication_token.token
+            if message.authentication_token.expire_time:
+                self.jw_expiration = message.authentication_token.expire_time.seconds * 1000
+                
+            #store accounts
+            if message.accounts:
+                for acc in message.accounts:
+                    self.accounts[acc.account_id] = acc
+        
+            if self.on_account_update:
+                self.on_account_update({
+                    'type': 'accounts',
+                    'accounts': list(self.accounts.values())
+                })
+        else:
+            print("login failed")
+        
     
     async def listen(self): #listens for any websocket messages
         
@@ -96,8 +128,7 @@ class Client:
         msg = decode_message(msg)
         print(type(msg))
         if msg.login_response:
-            print(msg.login_response)
-            self.handle_login(msg)
+            self.handle_login(msg.login_response)
     
         elif msg.heartbeat:
             print()
