@@ -82,8 +82,8 @@ async def send_heartbeat(ws):
 
           await send_message(ws, {"heartbeat": heartbeat_msg})
           print("Heartbeat sent.")
-     
-          await asyncio.sleep(heartbeat)
+
+          await asyncio.sleep(heartbeat)   
 #authentication using login
 async def authenticate():
      pass
@@ -93,7 +93,12 @@ async def listen(ws):
     try:
         while running:
             msg = await ws.recv()
-            print("Received:", decode_message(msg))
+            #print("Received:", decode_message(msg))
+            if decode_message(msg).HasField("login_response"):
+               login_response = decode_message(msg).login_response
+               print(login_response)
+            else:
+                print("no sir")
     except websockets.exceptions.ConnectionClosed:
         print("Connection closed by server.")
         running = False
